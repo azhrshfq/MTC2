@@ -1,0 +1,34 @@
+{
+  "name": "TeamMember",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the team member"
+    },
+    "role": {
+      "type": "string",
+      "description": "Job title or role"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department they belong to"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio or fun fact"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "email": {
+      "type": "string",
+      "description": "Contact email"
+    }
+  },
+  "required": [
+    "name",
+    "role"
+  ]
+}

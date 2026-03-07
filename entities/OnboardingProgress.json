@@ -1,0 +1,33 @@
+{
+  "name": "OnboardingProgress",
+  "type": "object",
+  "properties": {
+    "current_step": {
+      "type": "number",
+      "default": 0,
+      "description": "Current step in the onboarding flow"
+    },
+    "completed_steps": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "List of completed step indices"
+    },
+    "acknowledged_policies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of acknowledged policy IDs"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether onboarding is fully completed"
+    }
+  },
+  "required": [
+    "current_step"
+  ]
+}

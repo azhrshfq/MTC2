@@ -1,0 +1,49 @@
+{
+  "name": "Dependent",
+  "type": "object",
+  "properties": {
+    "member_id": {
+      "type": "string",
+      "description": "ID of the primary member"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "nric": {
+      "type": "string"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "relationship": {
+      "type": "string",
+      "enum": [
+        "Spouse",
+        "Child",
+        "Parent",
+        "Parent-in-law",
+        "Sibling"
+      ]
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "Male",
+        "Female"
+      ]
+    },
+    "coverage_type": {
+      "type": "string",
+      "enum": [
+        "Full",
+        "50% Discount"
+      ]
+    }
+  },
+  "required": [
+    "member_id",
+    "full_name",
+    "relationship"
+  ]
+}

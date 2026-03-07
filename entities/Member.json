@@ -1,0 +1,106 @@
+{
+  "name": "Member",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Full name as per NRIC"
+    },
+    "nric": {
+      "type": "string",
+      "description": "NRIC number"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "Male",
+        "Female"
+      ]
+    },
+    "nationality": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "Skim Pintar",
+        "Skim Pintar Plus"
+      ]
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "bank_account_number": {
+      "type": "string"
+    },
+    "giro_amount": {
+      "type": "number"
+    },
+    "application_status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Under Review",
+        "Approved",
+        "Active",
+        "Suspended",
+        "Rejected"
+      ],
+      "default": "Pending"
+    },
+    "membership_id": {
+      "type": "string"
+    },
+    "membership_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_payment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_payment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "Current",
+        "Grace Period",
+        "Overdue",
+        "N/A"
+      ],
+      "default": "N/A"
+    },
+    "nric_doc_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name",
+    "nric",
+    "email",
+    "phone",
+    "plan"
+  ]
+}

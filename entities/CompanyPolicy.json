@@ -1,0 +1,41 @@
+{
+  "name": "CompanyPolicy",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Policy title"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of the policy"
+    },
+    "full_content": {
+      "type": "string",
+      "description": "Full policy content in markdown"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "workplace",
+        "benefits",
+        "conduct",
+        "security",
+        "time_off"
+      ],
+      "description": "Policy category"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon name for display"
+    },
+    "order": {
+      "type": "number",
+      "description": "Display order"
+    }
+  },
+  "required": [
+    "title",
+    "summary"
+  ]
+}
