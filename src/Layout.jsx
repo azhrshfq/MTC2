@@ -1,18 +1,34 @@
+// Layout.jsx
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useState } from "react";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X, Phone, Mail, Home, CreditCard, FileText, User, Info } from "lucide-react";
+import { NavigationUserMenu } from "@/components/ui/navigation-menu";
+import { useAuth } from "@/lib/AuthContext";
 
 const navLinks = [
-  { label: "Home", page: "Home" },
-  { label: "Plans & Benefits", page: "Plans" },
-  { label: "Register", page: "Register" },
-  { label: "My Account", page: "Dashboard" },
-  { label: "About & FAQ", page: "About" },
+  { label: "Home", page: "Home", icon: Home },
+  { label: "Plans & Benefits", page: "Plans", icon: CreditCard },
+  { label: "Register", page: "Register", icon: FileText },
+  { label: "My Account", page: "Dashboard", icon: User },
+  { label: "About & FAQ", page: "About", icon: Info },
 ];
 
 export default function Layout({ children, currentPageName }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Helper to check if a link is active
+  const isActive = (page) => {
+    const path = location.pathname;
+    if (page === 'Home' && (path === '/' || path === '/home' || path.includes('/MTC'))) return true;
+    if (page === 'Plans' && (path.includes('/plans') || path.includes('/MTC/plans'))) return true;
+    if (page === 'Register' && (path.includes('/register') || path.includes('/MTC/register'))) return true;
+    if (page === 'Dashboard' && (path.includes('/dashboard') || path.includes('/MTC/dashboard'))) return true;
+    if (page === 'About' && (path.includes('/about') || path.includes('/MTC/about'))) return true;
+    return false;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -44,22 +60,10 @@ export default function Layout({ children, currentPageName }) {
             </div>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.page}
-                to={createPageUrl(link.page)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  currentPageName === link.page
-                    ? "bg-[#1a6b4a] text-white"
-                    : "text-gray-600 hover:bg-green-50 hover:text-[#1a6b4a]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          {/* Desktop nav - Use NavigationUserMenu */}
+          <div className="hidden md:block">
+            <NavigationUserMenu />
+          </div>
 
           {/* Mobile menu toggle */}
           <button
@@ -79,15 +83,30 @@ export default function Layout({ children, currentPageName }) {
                 key={link.page}
                 to={createPageUrl(link.page)}
                 onClick={() => setMenuOpen(false)}
-                className={`block px-4 py-3 rounded-lg text-base font-medium my-1 transition-all ${
-                  currentPageName === link.page
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium my-1 transition-all ${
+                  isActive(link.page)
                     ? "bg-[#1a6b4a] text-white"
                     : "text-gray-700 hover:bg-green-50 hover:text-[#1a6b4a]"
                 }`}
               >
+                <link.icon className="w-5 h-5" />
                 {link.label}
               </Link>
             ))}
+            
+            {/* Show logout in mobile menu when logged in */}
+            {user && (
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  // You might want to add logout logic here
+                }}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-base font-medium my-1 text-red-600 hover:bg-red-50 transition-all"
+              >
+                <User className="w-5 h-5" />
+                Logout
+              </button>
+            )}
           </div>
         )}
       </header>
@@ -119,7 +138,8 @@ export default function Layout({ children, currentPageName }) {
               <ul className="space-y-2">
                 {navLinks.map((link) => (
                   <li key={link.page}>
-                    <Link to={createPageUrl(link.page)} className="text-green-300 hover:text-white text-sm transition-colors">
+                    <Link to={createPageUrl(link.page)} className="text-green-300 hover:text-white text-sm transition-colors flex items-center gap-2">
+                      <link.icon className="w-4 h-4" />
                       {link.label}
                     </Link>
                   </li>
@@ -130,9 +150,13 @@ export default function Layout({ children, currentPageName }) {
             <div>
               <h4 className="font-semibold mb-4 text-green-100">Contact Us</h4>
               <ul className="space-y-2 text-sm text-green-300">
-                <li>📍 Masjid Ar-Raudhah, Singapore</li>
-                <li>📞 <a href="tel:+6561234567" className="hover:text-white">6123 4567</a></li>
-                <li>✉️ <a href="mailto:skimpintar@ar-raudhah.sg" className="hover:text-white">skimpintar@ar-raudhah.sg</a></li>
+                <li className="flex items-center gap-2">📍 Masjid Ar-Raudhah, Singapore</li>
+                <li className="flex items-center gap-2">
+                  📞 <a href="tel:+6561234567" className="hover:text-white">6123 4567</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  ✉️ <a href="mailto:skimpintar@ar-raudhah.sg" className="hover:text-white">skimpintar@ar-raudhah.sg</a>
+                </li>
                 <li className="pt-2 text-green-400 text-xs">Mon–Fri: 9am–5pm | Sat: 9am–1pm</li>
               </ul>
             </div>

@@ -1,0 +1,83 @@
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, CheckCircle, Send } from "lucide-react";
+import { useState } from "react";
+
+export default function StepReview({ data, onSubmit, onBack, submitting }) {
+  const [agreed, setAgreed] = useState(false);
+
+  const rows = [
+    { label: "Full Name", value: data.full_name },
+    { label: "NRIC", value: data.nric },
+    { label: "Date of Birth", value: data.date_of_birth },
+    { label: "Gender", value: data.gender },
+    { label: "Mobile", value: data.phone },
+    { label: "Email", value: data.email },
+    { label: "Address", value: data.address },
+    { label: "Postal Code", value: data.postal_code },
+    { label: "Plan", value: data.plan },
+    { label: "Bank", value: data.bank_name },
+    { label: "Account No.", value: data.bank_account_number ? "•••• " + data.bank_account_number.slice(-4) : "—" },
+  ];
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h3 className="text-xl font-bold text-gray-900 mb-1">Review Your Application</h3>
+        <p className="text-gray-500 text-sm">Please verify all details before submitting. You can still go back to make changes.</p>
+      </div>
+
+      <div className="rounded-2xl border border-gray-200 overflow-hidden">
+        {rows.map(({ label, value }, i) => (
+          <div key={label} className={`flex items-center gap-4 px-5 py-3 ${i % 2 === 0 ? "bg-white" : "bg-[#f7f9f7]"}`}>
+            <span className="text-sm text-gray-500 w-32 shrink-0">{label}</span>
+            <span className="text-sm font-medium text-gray-900 break-all">{value || "—"}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-4 px-5 py-3 bg-green-50">
+          <span className="text-sm text-gray-500 w-32 shrink-0">NRIC Doc</span>
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1a6b4a]">
+            <CheckCircle className="w-4 h-4" /> Uploaded
+          </span>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+        <strong>Processing Time:</strong> Your application will be reviewed within <strong>1–7 working days</strong>. You will receive email and SMS updates on the status of your application.
+      </div>
+
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          className="mt-1 w-5 h-5 rounded accent-[#1a6b4a] shrink-0"
+        />
+        <span className="text-sm text-gray-600">
+          I confirm that all information provided is accurate and correct. I consent to the collection and use of my personal data for membership administration purposes under the <strong>Personal Data Protection Act (PDPA)</strong>. I agree to the <strong>Terms & Conditions</strong> of Skim Pintar.
+        </span>
+      </label>
+
+      <div className="flex gap-3 pt-2">
+        <Button variant="outline" onClick={onBack} disabled={submitting} className="flex-1 h-12 rounded-xl">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+        </Button>
+        <Button
+          onClick={onSubmit}
+          disabled={!agreed || submitting}
+          className="flex-1 h-12 bg-[#1a6b4a] hover:bg-[#0f4a33] rounded-xl font-semibold"
+        >
+          {submitting ? (
+            <span className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Submitting...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <Send className="w-4 h-4" /> Submit Application
+            </span>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}

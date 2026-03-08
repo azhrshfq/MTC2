@@ -1,153 +1,169 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
-import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
-  const [authError, setAuthError] = useState(null);
-  const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    checkAppState();
+    // Check if user is logged in
+    const checkAuth = async () => {
+      try {
+        // Clear any stale user data on initial load
+        const savedUser = localStorage.getItem('skim-pintar-user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        } else {
+          const userData = await base44.auth.me();
+          setUser(userData);
+          if (userData) {
+            localStorage.setItem('skim-pintar-user', JSON.stringify(userData));
+          }
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
-  const checkAppState = async () => {
+  const login = async (email) => {
     try {
-      setIsLoadingPublicSettings(true);
-      setAuthError(null);
+      setLoading(true);
+      // Mock login - just set the user
+      const userData = { email };
+      setUser(userData);
+      localStorage.setItem('skim-pintar-user', JSON.stringify(userData));
+      return { success: true };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Singpass login method
+  const loginWithSingpass = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Step 1: Get session token from your backend (mock for now)
+      const mockToken = "mock-singpass-token-" + Date.now();
       
-      // First, check app public settings (with token if available)
-      // This will tell us if auth is required, user not registered, etc.
-      const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
-        headers: {
-          'X-App-Id': appParams.appId
-        },
-        token: appParams.token, // Include token if available
-        interceptResponses: true
+      // Simulate Singpass verification
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mock user data returned from Singpass
+      const mockUserData = {
+        email: "user@example.com",
+        full_name: "Test User",
+        nric: "S1234567A",
+        phone: "91234567",
+        address: "123 Test Street",
+        postal_code: "123456",
+        nationality: "Singaporean",
+        singpass_verified: true,
+        verified_at: new Date().toISOString()
+      };
+      
+      // Set the user with Singpass data
+      setUser(mockUserData);
+      localStorage.setItem('skim-pintar-user', JSON.stringify(mockUserData));
+      
+      return { success: true, user: mockUserData };
+      
+    } catch (err) {
+      console.error('Singpass login error:', err);
+      setError(err.message || 'Singpass login failed');
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Method to handle Singpass callback
+  const handleSingpassCallback = async (code) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch('/api/singpass/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
       });
       
+      const userData = await response.json();
+      setUser(userData);
+      localStorage.setItem('skim-pintar-user', JSON.stringify(userData));
+      
+      return { success: true, user: userData };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      // Clear all auth state
+      setUser(null);
+      
+      // Clear all storage
+      localStorage.removeItem('skim-pintar-user');
+      localStorage.removeItem('user'); // Remove old key just in case
+      sessionStorage.clear(); // Clear any session storage
+      
+      // Clear any other app-specific storage
+      localStorage.removeItem('auth-token');
+      localStorage.removeItem('user-preferences');
+      
+      // Optionally call backend logout endpoint
       try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
-        setAppPublicSettings(publicSettings);
-        
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-        }
-        setIsLoadingPublicSettings(false);
-      } catch (appError) {
-        console.error('App state check failed:', appError);
-        
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else {
-          setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
-          });
-        }
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
+        await base44.auth.logout();
+      } catch (e) {
+        console.warn('Backend logout failed:', e);
       }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
-  };
-
-  const checkUserAuth = async () => {
-    try {
-      // Now check if the user is authenticated
-      setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      setIsAuthenticated(true);
-      setIsLoadingAuth(false);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
-      setIsAuthenticated(false);
       
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
-      }
+      return { success: true };
+    } catch (error) {
+      console.error('Logout error:', error);
+      return { success: false, error: error.message };
     }
   };
 
-  const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-    
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
-    }
-  };
-
-  const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
-    base44.auth.redirectToLogin(window.location.href);
+  const value = {
+    user,
+    loading,
+    error,
+    login,
+    loginWithSingpass,
+    handleSingpassCallback,
+    logout,
+    isAuthenticated: !!user
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      isLoadingAuth,
-      isLoadingPublicSettings,
-      authError,
-      appPublicSettings,
-      logout,
-      navigateToLogin,
-      checkAppState
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
+      <div id="singpass-container" style={{ display: 'none' }} />
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

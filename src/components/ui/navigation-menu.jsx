@@ -1,9 +1,11 @@
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { cva } from "class-variance-authority"
-import { ChevronDown } from "lucide-react"
-
+import { ChevronDown, User, LogOut, Home, CreditCard, Info, FileText } from "lucide-react"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/lib/AuthContext"
+import { createPageUrl } from "@/utils"
 
 const NavigationMenu = React.forwardRef(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Root
@@ -91,6 +93,97 @@ const NavigationMenuIndicator = React.forwardRef(({ className, ...props }, ref) 
 NavigationMenuIndicator.displayName =
   NavigationMenuPrimitive.Indicator.displayName
 
+// Custom NavigationUserMenu component that uses auth
+const NavigationUserMenu = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  // Helper to check if a link is active
+  const isActive = (page) => {
+    const path = location.pathname;
+    if (page === 'Home' && (path === '/' || path === '/home')) return true;
+    if (page === 'Plans' && path.includes('/plans')) return true;
+    if (page === 'Register' && path.includes('/register')) return true;
+    if (page === 'Dashboard' && path.includes('/dashboard')) return true;
+    if (page === 'About' && path.includes('/about')) return true;
+    return false;
+  };
+
+  const navLinks = [
+    { label: "Home", page: "Home", icon: Home },
+    { label: "Plans & Benefits", page: "Plans", icon: CreditCard },
+    { label: "Register", page: "Register", icon: FileText },
+    { label: "My Account", page: "Dashboard", icon: User },
+    { label: "About & FAQ", page: "About", icon: Info },
+  ];
+
+  return (
+    <NavigationMenu>
+      <NavigationMenuList className="gap-1">
+        {/* Regular navigation links */}
+        {navLinks.map((link) => (
+          <NavigationMenuItem key={link.page}>
+            <Link
+              to={createPageUrl(link.page)}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "group inline-flex items-center gap-2",
+                isActive(link.page) && "bg-[#1a6b4a] text-white hover:bg-[#0f4a33] hover:text-white"
+              )}
+            >
+              <link.icon className="w-4 h-4" />
+              <span className="hidden lg:inline">{link.label}</span>
+              <span className="lg:hidden">{link.page}</span>
+            </Link>
+          </NavigationMenuItem>
+        ))}
+
+        {/* Simple user menu button - only shown when logged in */}
+        {user && (
+          <NavigationMenuItem>
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              )}
+            >
+              {isLoggingOut ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                  <span className="hidden lg:inline">Logging out...</span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden lg:inline">Logout</span>
+                  <span className="lg:hidden">Logout</span>
+                </>
+              )}
+            </button>
+          </NavigationMenuItem>
+        )}
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+};
+
+// Make sure to export everything
 export {
   navigationMenuTriggerStyle,
   NavigationMenu,
@@ -101,4 +194,5 @@ export {
   NavigationMenuLink,
   NavigationMenuIndicator,
   NavigationMenuViewport,
+  NavigationUserMenu,
 }

@@ -2,9 +2,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Info } from "lucide-react";
+import { ArrowRight, Info, CheckCircle } from "lucide-react";
 
-export default function StepPersonal({ data, onChange, onNext }) {
+export default function StepPersonal({ data, onChange, onNext, singpassVerified }) {
   const handleChange = (field, val) => onChange({ ...data, [field]: val });
 
   const isValid = data.full_name && data.nric && data.date_of_birth && data.gender && data.phone && data.email && data.address && data.postal_code;
@@ -16,6 +16,23 @@ export default function StepPersonal({ data, onChange, onNext }) {
         <p className="text-gray-500 text-sm">Please enter your details as per your NRIC.</p>
       </div>
 
+      {/* Singpass Verified Banner */}
+      {singpassVerified && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-green-800">Verified with Singpass</p>
+              <p className="text-sm text-green-600">
+                Your identity has been verified. Fields are pre-filled from Singpass.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
           <Label className="text-sm font-semibold text-gray-700 mb-1.5 block">Full Name (as per NRIC) *</Label>
@@ -24,7 +41,11 @@ export default function StepPersonal({ data, onChange, onNext }) {
             onChange={(e) => handleChange("full_name", e.target.value)}
             placeholder="e.g. Ahmad Bin Abdullah"
             className="h-12 text-base rounded-xl border-gray-300 focus:border-[#1a6b4a] focus:ring-[#1a6b4a]"
+            disabled={singpassVerified} // Disable if Singpass verified
           />
+          {singpassVerified && (
+            <p className="text-xs text-green-600 mt-1">✓ Verified from Singpass</p>
+          )}
         </div>
 
         <div>
@@ -34,7 +55,11 @@ export default function StepPersonal({ data, onChange, onNext }) {
             onChange={(e) => handleChange("nric", e.target.value.toUpperCase())}
             placeholder="e.g. S1234567A"
             className="h-12 text-base rounded-xl border-gray-300 focus:border-[#1a6b4a] focus:ring-[#1a6b4a]"
+            disabled={singpassVerified} // Disable if Singpass verified
           />
+          {singpassVerified && (
+            <p className="text-xs text-green-600 mt-1">✓ Verified from Singpass</p>
+          )}
         </div>
 
         <div>
@@ -72,6 +97,9 @@ export default function StepPersonal({ data, onChange, onNext }) {
               <SelectItem value="Others">Others</SelectItem>
             </SelectContent>
           </Select>
+          {singpassVerified && (
+            <p className="text-xs text-green-600 mt-1">✓ Verified from Singpass</p>
+          )}
         </div>
 
         <div>
@@ -103,7 +131,11 @@ export default function StepPersonal({ data, onChange, onNext }) {
             onChange={(e) => handleChange("address", e.target.value)}
             placeholder="Block, Street Name, Unit Number"
             className="h-12 text-base rounded-xl border-gray-300 focus:border-[#1a6b4a] focus:ring-[#1a6b4a]"
+            disabled={singpassVerified} // Disable if Singpass verified
           />
+          {singpassVerified && (
+            <p className="text-xs text-green-600 mt-1">✓ Verified from Singpass</p>
+          )}
         </div>
 
         <div>
@@ -114,7 +146,11 @@ export default function StepPersonal({ data, onChange, onNext }) {
             placeholder="e.g. 520123"
             maxLength={6}
             className="h-12 text-base rounded-xl border-gray-300 focus:border-[#1a6b4a] focus:ring-[#1a6b4a]"
+            disabled={singpassVerified} // Disable if Singpass verified
           />
+          {singpassVerified && (
+            <p className="text-xs text-green-600 mt-1">✓ Verified from Singpass</p>
+          )}
         </div>
       </div>
 

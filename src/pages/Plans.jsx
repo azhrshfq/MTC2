@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { CheckCircle, X, ArrowRight, Shield, Heart, Users, BookOpen, Car, Droplets } from "lucide-react";
 
@@ -17,6 +17,18 @@ const benefits = [
 ];
 
 export default function Plans() {
+  const navigate = useNavigate();
+
+  const handleChoosePlan = (planType) => {
+    // Map the plan type to the actual plan name
+    const planName = planType === 'basic' ? 'Skim Pintar' : 'Skim Pintar Plus';
+    
+    // Navigate to register with the selected plan in state
+    navigate('/register', { 
+      state: { selectedPlan: planName }
+    });
+  };
+
   return (
     <div>
       {/* Hero */}
@@ -42,6 +54,7 @@ export default function Plans() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mt-4">Skim Pintar</h2>
               <div className="mt-3 mb-2">
+                <span className="text-3xl font-normal text-[#1a6b4a]">Starting from </span>
                 <span className="text-5xl font-bold text-[#1a6b4a]">$5</span>
                 <span className="text-gray-500 ml-1">/month</span>
               </div>
@@ -63,12 +76,12 @@ export default function Plans() {
                 ))}
               </div>
 
-              <Link
-                to={createPageUrl("Register") + "?plan=basic"}
-                className="block text-center bg-[#1a6b4a] hover:bg-[#0f4a33] text-white font-semibold py-4 rounded-xl transition-colors text-lg"
+              <button
+                onClick={() => handleChoosePlan('basic')}
+                className="w-full text-center bg-[#1a6b4a] hover:bg-[#0f4a33] text-white font-semibold py-4 rounded-xl transition-colors text-lg"
               >
                 Choose Skim Pintar
-              </Link>
+              </button>
             </div>
 
             {/* Skim Pintar Plus */}
@@ -81,7 +94,8 @@ export default function Plans() {
                 </div>
                 <h2 className="text-2xl font-bold text-white mt-2">Skim Pintar Plus</h2>
                 <div className="mt-3 mb-2">
-                  <span className="text-5xl font-bold text-white">$20+</span>
+                  <span className="text-3xl font-normal text-white">Starting from </span>
+                  <span className="text-5xl font-bold text-white">$20</span>
                   <span className="text-green-200 ml-1">/month</span>
                 </div>
                 <p className="text-green-200 text-sm mb-8">All individual benefits + complete family protection</p>
@@ -104,12 +118,12 @@ export default function Plans() {
                   ))}
                 </div>
 
-                <Link
-                  to={createPageUrl("Register") + "?plan=plus"}
-                  className="block text-center bg-[#c9a84c] hover:bg-[#b8943e] text-white font-semibold py-4 rounded-xl transition-colors text-lg"
+                <button
+                  onClick={() => handleChoosePlan('plus')}
+                  className="w-full text-center bg-[#c9a84c] hover:bg-[#b8943e] text-white font-semibold py-4 rounded-xl transition-colors text-lg"
                 >
                   Choose Skim Pintar Plus
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -174,9 +188,12 @@ export default function Plans() {
 
       <section className="py-12 text-center bg-[#1a6b4a]">
         <h2 className="text-2xl font-bold text-white mb-4">Ready to get protected?</h2>
-        <Link to={createPageUrl("Register")} className="inline-flex items-center gap-2 bg-[#c9a84c] hover:bg-[#b8943e] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all hover:shadow-xl">
+        <button
+          onClick={() => handleChoosePlan('basic')}
+          className="inline-flex items-center gap-2 bg-[#c9a84c] hover:bg-[#b8943e] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all hover:shadow-xl"
+        >
           Register Today <ArrowRight className="w-5 h-5" />
-        </Link>
+        </button>
       </section>
     </div>
   );

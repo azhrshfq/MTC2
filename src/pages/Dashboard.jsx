@@ -1,9 +1,23 @@
+// pages/Dashboard.jsx
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { CheckCircle, Clock, AlertCircle, XCircle, User, CreditCard, Users, Bell, RefreshCw, ChevronRight, Shield } from "lucide-react";
+import { 
+  CheckCircle, 
+  Clock, 
+  AlertCircle, 
+  XCircle, 
+  User, 
+  CreditCard, 
+  Users, 
+  Bell, 
+  RefreshCw, 
+  ChevronRight, 
+  Shield
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/AuthContext";
 
 const statusConfig = {
   Pending: { color: "text-amber-700 bg-amber-100 border-amber-200", icon: Clock, label: "Pending Review" },
@@ -59,11 +73,15 @@ function StatusTracker({ status }) {
 }
 
 export default function Dashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [notFound, setNotFound] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(user => {
@@ -91,6 +109,30 @@ export default function Dashboard() {
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
     loadMember(searchInput.trim().toLowerCase());
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleSwitchAccount = async () => {
+    setIsSwitchingAccount(true);
+    try {
+      await logout();
+      navigate('/register');
+    } catch (error) {
+      console.error('Switch account error:', error);
+    } finally {
+      setIsSwitchingAccount(false);
+    }
   };
 
   if (loading) {
@@ -133,6 +175,21 @@ export default function Dashboard() {
               <Button onClick={handleSearch} className="w-full h-12 bg-[#1a6b4a] hover:bg-[#0f4a33] rounded-xl font-semibold">
                 Look Up Application
               </Button>
+              
+              {/* Only show logout option if user is logged in but no member found */}
+              {user && (
+                <>
+                  <div className="text-sm text-gray-400 pt-2">— or —</div>
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full border-2 border-red-500 text-red-500 font-semibold py-3 rounded-xl text-center hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
+                  </button>
+                </>
+              )}
+              
               <div className="text-sm text-gray-400 pt-2">— or —</div>
               <Link
                 to={createPageUrl("Register")}
@@ -164,6 +221,7 @@ export default function Dashboard() {
               <StatusIcon className="w-4 h-4" />
               {sc.label}
             </div>
+            {/* Removed the logout button from header */}
           </div>
         </div>
       </div>
@@ -193,6 +251,57 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Account Actions Section - Now contains both Switch Account and Logout */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-[#1a6b4a]" /> Account Actions
+          </h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <button
+              onClick={handleSwitchAccount}
+              disabled={isSwitchingAccount}
+              className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-[#1a6b4a] transition-colors group disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100">
+                  <User className="w-5 h-5 text-[#1a6b4a]" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-900">Switch Account</div>
+                  <div className="text-xs text-gray-500">Register with a new account</div>
+                </div>
+              </div>
+              {isSwitchingAccount ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#1a6b4a]"></div>
+              ) : (
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#1a6b4a]" />
+              )}
+            </button>
+
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 transition-colors group disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center group-hover:bg-red-100">
+                  <div className="w-5 h-5 text-red-500">×</div>
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-900">Logout</div>
+                  <div className="text-xs text-gray-500">End your current session</div>
+                </div>
+              </div>
+              {isLoggingOut ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
+              ) : (
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-red-500" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Rest of your existing dashboard content */}
         <div className="grid md:grid-cols-3 gap-6">
           {/* Membership info */}
           <div className="md:col-span-2 space-y-6">
